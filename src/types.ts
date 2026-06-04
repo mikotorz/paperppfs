@@ -36,3 +36,22 @@ export interface Preset {
 }
 
 export type ActiveTab = 'adjustments' | 'filters' | 'grading' | 'effects'
+
+export interface CropRegion {
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
+export type AspectRatioPreset =
+  | 'free'
+  | '1:1'
+  | '4:3'
+  | '3:4'
+  | '16:9'
+  | '9:16'
+  | '2:3'
+  | '3:2'
+  | '5:7'
+  | '7:5'

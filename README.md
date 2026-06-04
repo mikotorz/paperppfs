@@ -1,9 +1,16 @@
-# Photo Editor
+> **AI-Generated Disclaimer**
+>
+> This project — including all source code, architecture, pixel-manipulation algorithms, component structure, and this README — was generated entirely by [Claude](https://claude.ai) (Anthropic), an AI assistant. It was produced via [Claude Code](https://claude.ai/code) in response to natural-language prompts.
+>
+> The code has been reviewed for correctness and type-checks cleanly, but has not been audited for production security or exhaustively tested across all browsers and image sizes. Use at your own discretion.
 
-A browser-based photo editing tool with filters, effects, and color grading. All image processing happens entirely on your device — no uploads, no server, no data leaves your browser.
+# paperppfs
+
+A browser-based photo editing tool with filters, effects, color grading, and crop. All image processing happens entirely on your device — no uploads, no server, no data leaves your browser.
 
 ## Features
 
+- **Crop** — Free-draw or constrained by aspect ratio (1:1, 4:3, 16:9, 2:3, 5:7 and portrait flips); drag to reposition the selection
 - **Basic Adjustments** — Brightness, contrast, saturation, sharpness, and Gaussian blur
 - **Filter Presets** — 10 one-click presets: Vintage, Noir, Vivid, Faded, Warm, Cool, Matte, Chrome, Fade
 - **Color Grading** — Hue rotation, per-channel RGB balance, shadow/highlight split-tone
@@ -41,11 +48,4 @@ Every adjustment runs a pixel pipeline entirely in the browser using the [Canvas
 1. Source pixels are extracted from the uploaded image once and kept immutable
 2. On each slider change, the full pipeline re-runs from the source: adjustments → color grading → artistic effects
 3. Output is written to a `<canvas>` element via `requestAnimationFrame` (debounced, so rapid drags never block the UI)
-
----
-
-> **AI-Generated Disclaimer**
->
-> This project — including all source code, architecture, pixel-manipulation algorithms, component structure, and this README — was generated entirely by [Claude](https://claude.ai) (Anthropic), an AI assistant. It was produced in a single session via [Claude Code](https://claude.ai/code) in response to a natural-language prompt requesting a client-side photo editing tool.
->
-> The code has been reviewed for correctness and type-checks cleanly, but has not been audited for production security or exhaustively tested across all browsers and image sizes. Use at your own discretion.
+4. Crop replaces the source image with the selected region, resetting the pipeline to the cropped pixels

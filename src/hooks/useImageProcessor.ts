@@ -10,20 +10,6 @@ export function useImageProcessor(
   const sourceDataRef = useRef<ImageData | null>(null)
   const rafRef = useRef<number>(0)
 
-  // Extract source ImageData when image changes
-  useEffect(() => {
-    if (!sourceImage) {
-      sourceDataRef.current = null
-      return
-    }
-    const tmp = document.createElement('canvas')
-    tmp.width = sourceImage.naturalWidth
-    tmp.height = sourceImage.naturalHeight
-    const ctx = tmp.getContext('2d')!
-    ctx.drawImage(sourceImage, 0, 0)
-    sourceDataRef.current = ctx.getImageData(0, 0, tmp.width, tmp.height)
-  }, [sourceImage])
-
   const render = useCallback(() => {
     const sourceData = sourceDataRef.current
     const canvas = canvasRef.current
@@ -37,6 +23,32 @@ export function useImageProcessor(
     runPipeline(sourceData, params, ctx)
   }, [canvasRef, params])
 
+  // Always keep a stable ref to the latest render so the source-extraction
+  // effect can schedule a repaint without taking render as a dependency
+  // (which would cause unnecessary re-extractions on every param change).
+  const renderRef = useRef(render)
+  renderRef.current = render
+
+  // Extract source ImageData when image changes, then force a repaint.
+  // This effect intentionally does NOT depend on `render` — we read it via
+  // renderRef so that changing params alone doesn't re-extract source data.
+  useEffect(() => {
+    if (!sourceImage) {
+      sourceDataRef.current = null
+      return
+    }
+    const tmp = document.createElement('canvas')
+    tmp.width = sourceImage.naturalWidth
+    tmp.height = sourceImage.naturalHeight
+    const ctx = tmp.getContext('2d')!
+    ctx.drawImage(sourceImage, 0, 0)
+    sourceDataRef.current = ctx.getImageData(0, 0, tmp.width, tmp.height)
+    // Source changed — schedule a render so the canvas reflects the new image.
+    cancelAnimationFrame(rafRef.current)
+    rafRef.current = requestAnimationFrame(() => renderRef.current())
+  }, [sourceImage])
+
+  // Re-render when params or canvasRef change (adjustments, effects, etc.)
   useEffect(() => {
     cancelAnimationFrame(rafRef.current)
     rafRef.current = requestAnimationFrame(render)
