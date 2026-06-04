@@ -23,10 +23,10 @@ export function imageToOverlay(
   overlayCanvas: HTMLCanvasElement,
   imgW: number,
   imgH: number,
+  dpr = (typeof window !== 'undefined' ? window.devicePixelRatio : 1) || 1,
 ): { x: number; y: number } {
   const imgRect = imageCanvas.getBoundingClientRect()
   const ovRect = overlayCanvas.getBoundingClientRect()
-  const dpr = window.devicePixelRatio || 1
   const scaleX = (imgRect.width / imgW) * dpr
   const scaleY = (imgRect.height / imgH) * dpr
   const offsetX = (imgRect.left - ovRect.left) * dpr
