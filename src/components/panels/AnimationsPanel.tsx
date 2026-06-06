@@ -23,6 +23,7 @@ export function AnimationsPanel({ animatedState, onAnimatedStateChange }: Props)
         Animate <span className="normal-case">(preview only — not exported)</span>
       </p>
 
+
       <div className="grid grid-cols-3 gap-1.5">
         {ANIMATED_EFFECTS.map(({ id, label }) => (
           <button

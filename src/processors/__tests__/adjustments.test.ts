@@ -95,4 +95,34 @@ describe('applyAdjustments', () => {
       expect(Array.from(out)).toEqual([100, 150, 200, 255, 50, 80, 120, 255])
     })
   })
+
+  describe('sharpness', () => {
+    it('sharpness=0 does not change pixels', () => {
+      const input = new Uint8ClampedArray([100, 150, 200, 255, 50, 80, 120, 255])
+      const out = applyAdjustments(input, 2, 1, params({ sharpness: 0 }))
+      expect(Array.from(out)).toEqual([100, 150, 200, 255, 50, 80, 120, 255])
+    })
+
+    it('sharpness > 0 increases the difference between a bright pixel and its darker neighbour', () => {
+      // 3-pixel row: dark | bright | dark  — sharpening pushes bright higher, darks lower
+      const input = new Uint8ClampedArray([
+        50, 50, 50, 255,
+        200, 200, 200, 255,
+        50, 50, 50, 255,
+      ])
+      const base = applyAdjustments(input, 3, 1, params({ sharpness: 0 }))
+      const sharp = applyAdjustments(input, 3, 1, params({ sharpness: 100 }))
+      // centre pixel should be boosted (brighter than the already-bright value)
+      expect(sharp[4]).toBeGreaterThan(base[4])
+      // edge pixels should be pulled down (darker than the dark value)
+      expect(sharp[0]).toBeLessThan(base[0])
+    })
+
+    it('sharpness preserves alpha', () => {
+      const input = new Uint8ClampedArray([200, 200, 200, 128, 50, 50, 50, 128])
+      const out = applyAdjustments(input, 2, 1, params({ sharpness: 100 }))
+      expect(out[3]).toBe(128)
+      expect(out[7]).toBe(128)
+    })
+  })
 })

@@ -12,9 +12,10 @@ A browser-based photo editing tool with filters, effects, color grading, and cro
 
 - **Crop** — Free-draw or constrained by aspect ratio (1:1, 4:3, 16:9, 2:3, 5:7 and portrait flips); drag to reposition the selection
 - **Basic Adjustments** — Brightness, contrast, saturation, sharpness, and Gaussian blur
-- **Filter Presets** — 10 one-click presets: Vintage, Noir, Vivid, Faded, Warm, Cool, Matte, Chrome, Fade
+- **Filter Presets** — One-click presets: Vintage, Noir, Vivid, Faded, Warm, Cool, Matte, Chrome, Fade
 - **Color Grading** — Hue rotation, per-channel RGB balance, shadow/highlight split-tone
-- **Artistic Effects** — Vignette, film grain, chromatic aberration, pixelate, emboss
+- **Artistic Effects** — Vignette, film grain, chromatic aberration, pixelate, emboss, glitch, scanlines, cross-process, duotone, light leak, halftone, bloom
+- **Animated Overlays** — Holographic, CRT, VHS, Film Reel, Neon Pulse, RGB Jitter (preview only, not exported)
 - **Export** — Download the edited image as a lossless PNG
 
 ## Getting Started
@@ -40,12 +41,14 @@ Produces a `dist/` folder that works as a fully static site — open `dist/index
 - [Vite](https://vite.dev/)
 - [Tailwind CSS v4](https://tailwindcss.com/)
 - Canvas 2D API for pixel-level image processing
+- Web Worker for non-blocking full-resolution rendering
 
 ## How It Works
 
-Every adjustment runs a pixel pipeline entirely in the browser using the [Canvas API](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API):
+Every adjustment runs a pixel pipeline entirely in the browser:
 
 1. Source pixels are extracted from the uploaded image once and kept immutable
-2. On each slider change, the full pipeline re-runs from the source: adjustments → color grading → artistic effects
-3. Output is written to a `<canvas>` element via `requestAnimationFrame` (debounced, so rapid drags never block the UI)
-4. Crop replaces the source image with the selected region, resetting the pipeline to the cropped pixels
+2. On each slider change, a **downsampled preview** (≤ 1200px) is rendered immediately via `requestAnimationFrame` — fast enough to stay smooth during drags
+3. After edits settle (~300 ms), the full-resolution pipeline runs in a **Web Worker** so the main thread is never blocked
+4. All three stages — adjustments → color grading → artistic effects — are applied to the pixel buffer without touching any server
+5. Crop replaces the source image with the selected region, resetting the pipeline to the cropped pixels

@@ -54,6 +54,33 @@ describe('applyColorGrading', () => {
     })
   })
 
+  describe('shadow tinting', () => {
+    // shadowTint is [hue°, saturation 0-100, strength 0-100]
+    it('shadowTint strength=0 does not change pixels', () => {
+      const input = px(50, 50, 50)
+      const out = applyColorGrading(input, 1, 1, params({ shadowTint: [0, 100, 0] }))
+      expect(Array.from(out)).toEqual([50, 50, 50, 255])
+    })
+
+    it('shadowTint shifts dark pixels toward the tint hue', () => {
+      // hue=0 (red), saturation=100, strength=100 → red tint on shadows
+      const input = px(10, 10, 10)
+      const out = applyColorGrading(input, 1, 1, params({ shadowTint: [0, 100, 100] }))
+      expect(out[0]).toBeGreaterThan(10)   // red channel lifted
+      expect(out[2]).toBeLessThan(out[0])  // blue channel suppressed
+    })
+
+    it('shadowTint has no effect on bright (highlight) pixels', () => {
+      // luma > 175 → shadow weight = 0, so tinting skipped entirely
+      const bright = px(240, 240, 240)
+      const dark = px(10, 10, 10)
+      const redShadow = params({ shadowTint: [0, 100, 100] })
+      const outBright = applyColorGrading(bright, 1, 1, redShadow)
+      const outDark = applyColorGrading(dark, 1, 1, redShadow)
+      expect(outDark[0] - dark[0]).toBeGreaterThan(outBright[0] - bright[0])
+    })
+  })
+
   describe('hue rotation', () => {
     it('hueRotation=0 does not change a colored pixel', () => {
       const input = px(255, 0, 0)

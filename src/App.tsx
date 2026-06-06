@@ -14,6 +14,7 @@ import { FiltersPanel } from './components/panels/FiltersPanel'
 import { ColorGradingPanel } from './components/panels/ColorGradingPanel'
 import { EffectsPanel } from './components/panels/EffectsPanel'
 import { AnimationsPanel } from './components/panels/AnimationsPanel'
+import { AnimateWarningGate } from './components/panels/AnimateWarningGate'
 import { CropPanel } from './components/panels/CropPanel'
 
 const TABS = [
@@ -38,6 +39,7 @@ export default function App() {
     effect: 'none',
     tilt3D: false,
   })
+  const [animateWarningAcknowledged, setAnimateWarningAcknowledged] = useState(false)
 
   const handleAnimatedStateChange = useCallback((partial: Partial<AnimatedEffectState>) => {
     setAnimatedState(prev => ({ ...prev, ...partial }))
@@ -54,7 +56,6 @@ export default function App() {
   }, [])
 
   const handleParamChange = useCallback((partial: Partial<AdjustmentParams>) => {
-    setActivePreset('none')
     setParams(prev => ({ ...prev, ...partial }))
   }, [])
 
@@ -201,10 +202,12 @@ export default function App() {
                 />
               )}
               {activeTab === 'animate' && (
-                <AnimationsPanel
-                  animatedState={animatedState}
-                  onAnimatedStateChange={handleAnimatedStateChange}
-                />
+                animateWarningAcknowledged
+                  ? <AnimationsPanel
+                      animatedState={animatedState}
+                      onAnimatedStateChange={handleAnimatedStateChange}
+                    />
+                  : <AnimateWarningGate onAcknowledge={() => setAnimateWarningAcknowledged(true)} />
               )}
             </div>
           </>

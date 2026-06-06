@@ -83,6 +83,31 @@ describe('applyArtisticEffects', () => {
     })
   })
 
+  describe('chromatic aberration', () => {
+    it('chromaticAberration=0 does not change pixels', () => {
+      const input = makeGrid([255, 0, 0, 255, 0, 255, 0, 255])
+      const out = applyArtisticEffects(input, 2, 1, params({ chromaticAberration: 0 }))
+      expect(Array.from(out)).toEqual([255, 0, 0, 255, 0, 255, 0, 255])
+    })
+
+    it('chromaticAberration > 0 offsets the red channel left relative to the blue channel', () => {
+      // 3-pixel row: red=255 | red=0 | red=0
+      // With offset=1, red channel shifts left by 1 so pixel[1].red takes pixel[0].red = 255
+      const input = makeGrid([
+        255, 128, 50, 255,
+        0,   128, 50, 255,
+        0,   128, 50, 255,
+      ])
+      const out = applyArtisticEffects(input, 3, 1, params({ chromaticAberration: 1 }))
+      // pixel[1] red should now come from pixel[0] original = 255
+      expect(out[4]).toBe(255)
+      // blue channel shifts right: pixel[1] blue takes pixel[2] original = 50
+      expect(out[6]).toBe(50)
+      // green channel is unchanged
+      expect(out[5]).toBe(128)
+    })
+  })
+
   describe('grain', () => {
     it('grain=0 does not change pixels', () => {
       const input = makeGrid([100, 100, 100, 255])
