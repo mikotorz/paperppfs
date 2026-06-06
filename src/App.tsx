@@ -13,6 +13,7 @@ import { AdjustmentsPanel } from './components/panels/AdjustmentsPanel'
 import { FiltersPanel } from './components/panels/FiltersPanel'
 import { ColorGradingPanel } from './components/panels/ColorGradingPanel'
 import { EffectsPanel } from './components/panels/EffectsPanel'
+import { AnimationsPanel } from './components/panels/AnimationsPanel'
 import { CropPanel } from './components/panels/CropPanel'
 
 const TABS = [
@@ -20,6 +21,7 @@ const TABS = [
   { id: 'filters', label: 'Filters' },
   { id: 'grading', label: 'Color' },
   { id: 'effects', label: 'Effects' },
+  { id: 'animate', label: 'Animate' },
 ]
 
 export default function App() {
@@ -196,6 +198,10 @@ export default function App() {
                 <EffectsPanel
                   params={params}
                   onChange={handleParamChange}
+                />
+              )}
+              {activeTab === 'animate' && (
+                <AnimationsPanel
                   animatedState={animatedState}
                   onAnimatedStateChange={handleAnimatedStateChange}
                 />

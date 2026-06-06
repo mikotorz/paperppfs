@@ -1,3 +1,11 @@
+function seededRand(seed: number): () => number {
+  let s = (seed >>> 0) || 1
+  return () => {
+    s = (Math.imul(s, 1664525) + 1013904223) >>> 0
+    return s / 0xFFFFFFFF
+  }
+}
+
 export function drawHolographic(ctx: CanvasRenderingContext2D, w: number, h: number, t: number): void {
   const pos = (t * 0.4) % 1.0
   const hue = (t * 60) % 360
@@ -26,4 +34,130 @@ export function drawCRT(ctx: CanvasRenderingContext2D, w: number, h: number, t: 
   const alpha = Math.max(0, Math.min(0.04, -flicker + 0.02))
   ctx.fillStyle = `rgba(0,0,0,${alpha})`
   ctx.fillRect(0, 0, w, h)
+}
+
+export function drawVHS(ctx: CanvasRenderingContext2D, w: number, h: number, t: number): void {
+  const frameIdx = Math.floor(t * 24)
+  const rand = seededRand(frameIdx * 7919 + 3)
+
+  // Chromatic haze bands (red/blue offset pairs)
+  ctx.globalCompositeOperation = 'screen'
+  const numBands = 2 + Math.floor(rand() * 3)
+  for (let i = 0; i < numBands; i++) {
+    const y = Math.floor(rand() * h)
+    const bh = 2 + Math.floor(rand() * 8)
+    ctx.fillStyle = `rgba(255,0,0,0.04)`
+    ctx.fillRect(-2, y, w + 2, bh)
+    ctx.fillStyle = `rgba(0,0,255,0.04)`
+    ctx.fillRect(2, y, w - 2, bh)
+  }
+  ctx.globalCompositeOperation = 'source-over'
+
+  // Random head-switching white lines
+  if (rand() < 0.08) {
+    const gy = Math.floor(rand() * h)
+    const gh = 1 + Math.floor(rand() * 3)
+    ctx.fillStyle = `rgba(255,255,255,0.15)`
+    ctx.fillRect(0, gy, w, gh)
+  }
+
+  // Slow-rolling dark bar
+  const barY = ((t * 0.15) % 1.0) * (h + 40) - 20
+  const barGrad = ctx.createLinearGradient(0, barY - 20, 0, barY + 20)
+  barGrad.addColorStop(0, 'rgba(0,0,0,0)')
+  barGrad.addColorStop(0.5, 'rgba(0,0,0,0.12)')
+  barGrad.addColorStop(1, 'rgba(0,0,0,0)')
+  ctx.fillStyle = barGrad
+  ctx.fillRect(0, barY - 20, w, 40)
+}
+
+export function drawFilmReel(ctx: CanvasRenderingContext2D, w: number, h: number, t: number): void {
+  const frameIdx = Math.floor(t * 18)
+  const rand = seededRand(frameIdx * 6271 + 17)
+
+  // Vertical scratch lines
+  const numScratches = Math.floor(rand() * 2) + 1
+  ctx.lineWidth = 1
+  for (let i = 0; i < numScratches; i++) {
+    const sx = Math.floor(rand() * w)
+    const alpha = 0.05 + rand() * 0.2
+    const thick = rand() < 0.25 ? 2 : 1
+    ctx.strokeStyle = `rgba(255,255,255,${alpha})`
+    ctx.lineWidth = thick
+    const y0 = Math.floor(rand() * h * 0.3)
+    const y1 = Math.min(h, Math.floor(y0 + rand() * h * 0.7 + h * 0.1))
+    ctx.beginPath()
+    ctx.moveTo(sx, y0)
+    ctx.lineTo(sx + (rand() - 0.5) * 3, y1)
+    ctx.stroke()
+  }
+
+  // Dust spots
+  const numDust = Math.floor(rand() * 4)
+  for (let i = 0; i < numDust; i++) {
+    const dx = Math.floor(rand() * w)
+    const dy = Math.floor(rand() * h)
+    const dr = 1 + rand() * 2.5
+    ctx.beginPath()
+    ctx.arc(dx, dy, dr, 0, Math.PI * 2)
+    ctx.fillStyle = `rgba(255,255,255,${0.25 + rand() * 0.45})`
+    ctx.fill()
+  }
+
+  // Frame jump flash every ~8 seconds
+  const jumpCycle = Math.floor(t / 8)
+  const jumpRand = seededRand(jumpCycle * 9901 + 7)
+  const jumpT = (t % 8) / 8
+  if (jumpT < 0.04 && jumpRand() > 0.5) {
+    const fadeOut = 1 - jumpT / 0.04
+    ctx.fillStyle = `rgba(255,255,255,${0.3 * fadeOut})`
+    ctx.fillRect(0, 0, w, h)
+  }
+}
+
+export function drawNeonPulse(ctx: CanvasRenderingContext2D, w: number, h: number, t: number): void {
+  const pulse = Math.sin(t * 2.5) * 0.5 + 0.5
+  const hue = (t * 40) % 360
+  const minDim = Math.min(w, h)
+
+  ctx.globalCompositeOperation = 'screen'
+
+  // Radial glow from edges
+  const edgeGrad = ctx.createRadialGradient(w / 2, h / 2, minDim * 0.25, w / 2, h / 2, minDim * 0.75)
+  edgeGrad.addColorStop(0, 'rgba(0,0,0,0)')
+  edgeGrad.addColorStop(1, `hsla(${hue}, 100%, 60%, ${0.07 + pulse * 0.11})`)
+  ctx.fillStyle = edgeGrad
+  ctx.fillRect(0, 0, w, h)
+
+  // Moving horizontal scan-glow
+  const scanY = ((t * 0.8 + Math.sin(t * 0.3) * 0.1) % 1.0) * h
+  const scanGrad = ctx.createLinearGradient(0, scanY - 4, 0, scanY + 4)
+  scanGrad.addColorStop(0, 'rgba(0,0,0,0)')
+  scanGrad.addColorStop(0.5, `hsla(${(hue + 60) % 360}, 100%, 80%, ${0.14 + pulse * 0.1})`)
+  scanGrad.addColorStop(1, 'rgba(0,0,0,0)')
+  ctx.fillStyle = scanGrad
+  ctx.fillRect(0, scanY - 4, w, 8)
+
+  ctx.globalCompositeOperation = 'source-over'
+}
+
+export function drawRGBJitter(ctx: CanvasRenderingContext2D, w: number, h: number, t: number): void {
+  // Mostly calm — only glitches occasionally
+  const isGlitch = Math.sin(t * 3.7) > 0.6
+  if (!isGlitch) return
+
+  const frameIdx = Math.floor(t * 30)
+  const rand = seededRand(frameIdx * 4337 + 11)
+  if (rand() > 0.7) return  // thin out further
+
+  const offsetX = (rand() * 2 - 1) * 10
+  const offsetY = (rand() * 2 - 1) * 3
+  const alpha = 0.05 + rand() * 0.09
+
+  ctx.globalCompositeOperation = 'screen'
+  ctx.fillStyle = `rgba(255,0,0,${alpha})`
+  ctx.fillRect(offsetX, offsetY, w, h)
+  ctx.fillStyle = `rgba(0,0,255,${alpha})`
+  ctx.fillRect(-offsetX, -offsetY, w, h)
+  ctx.globalCompositeOperation = 'source-over'
 }

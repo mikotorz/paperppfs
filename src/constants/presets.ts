@@ -117,4 +117,38 @@ export const PRESETS: Preset[] = [
       grain: 5,
     },
   },
+  {
+    name: 'newsprint',
+    label: 'Newsprint',
+    params: {
+      ...p,
+      saturation: -80,
+      contrast: 20,
+      halftoneSize: 8,
+      halftoneAngle: 45,
+    },
+  },
+  {
+    name: 'crossx',
+    label: 'Cross-X',
+    params: {
+      ...p,
+      crossProcessStrength: 70,
+      grain: 15,
+      vignette: 30,
+      contrast: 20,
+    },
+  },
+  {
+    name: 'cineglow',
+    label: 'Cine Glow',
+    params: {
+      ...p,
+      bloomStrength: 60,
+      bloomRadius: 8,
+      bloomThreshold: 170,
+      saturation: 20,
+      contrast: 15,
+    },
+  },
 ]

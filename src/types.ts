@@ -18,9 +18,24 @@ export interface AdjustmentParams {
   glitchSlices: number
   glitchOffset: number
   scanlines: number
+  // Print
+  halftoneSize: number
+  halftoneAngle: number
+  halftoneCMYK: boolean
+  // Film
+  crossProcessStrength: number
+  lightLeakStrength: number
+  // Cinematic
+  bloomStrength: number
+  bloomRadius: number
+  bloomThreshold: number
+  // Tone
+  duotoneStrength: number
+  duotoneShadowColor: [number, number, number]
+  duotoneHighlightColor: [number, number, number]
 }
 
-export type AnimatedEffect = 'none' | 'holographic' | 'crt'
+export type AnimatedEffect = 'none' | 'holographic' | 'crt' | 'vhs' | 'filmreel' | 'neonpulse' | 'rgbjitter'
 
 export interface AnimatedEffectState {
   effect: AnimatedEffect
@@ -38,6 +53,9 @@ export type PresetName =
   | 'matte'
   | 'chrome'
   | 'fade'
+  | 'newsprint'
+  | 'crossx'
+  | 'cineglow'
 
 export interface Preset {
   name: PresetName
@@ -45,7 +63,7 @@ export interface Preset {
   params: AdjustmentParams
 }
 
-export type ActiveTab = 'adjustments' | 'filters' | 'grading' | 'effects'
+export type ActiveTab = 'adjustments' | 'filters' | 'grading' | 'effects' | 'animate'
 
 export interface CropRegion {
   x: number
