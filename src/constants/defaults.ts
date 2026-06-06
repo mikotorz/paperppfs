@@ -17,4 +17,7 @@ export const DEFAULT_PARAMS: AdjustmentParams = {
   chromaticAberration: 0,
   pixelate: 1,
   emboss: 0,
+  glitchSlices: 0,
+  glitchOffset: 0,
+  scanlines: 0,
 }

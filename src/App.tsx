@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from 'react'
-import type { ActiveTab, AdjustmentParams, AspectRatioPreset, CropRegion, PresetName } from './types'
+import type { ActiveTab, AdjustmentParams, AnimatedEffectState, AspectRatioPreset, CropRegion, PresetName } from './types'
 import { DEFAULT_PARAMS } from './constants/defaults'
 import { PRESETS } from './constants/presets'
 import { ASPECT_RATIO_PRESETS, FLIP_MAP } from './constants/cropPresets'
@@ -32,6 +32,14 @@ export default function App() {
   const [cropRegion, setCropRegion] = useState<CropRegion | null>(null)
   const [aspectRatio, setAspectRatio] = useState<AspectRatioPreset>('free')
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const [animatedState, setAnimatedState] = useState<AnimatedEffectState>({
+    effect: 'none',
+    tilt3D: false,
+  })
+
+  const handleAnimatedStateChange = useCallback((partial: Partial<AnimatedEffectState>) => {
+    setAnimatedState(prev => ({ ...prev, ...partial }))
+  }, [])
 
   const handleImageLoaded = useCallback((img: HTMLImageElement, name: string) => {
     setSourceImage(img)
@@ -131,6 +139,8 @@ export default function App() {
           sourceImage={sourceImage}
           params={params}
           canvasRef={canvasRef}
+          animatedEffect={animatedState.effect}
+          tilt3D={animatedState.tilt3D}
           cropOverlay={
             isCropMode ? (
               <CropOverlay
@@ -183,7 +193,12 @@ export default function App() {
                 <ColorGradingPanel params={params} onChange={handleParamChange} />
               )}
               {activeTab === 'effects' && (
-                <EffectsPanel params={params} onChange={handleParamChange} />
+                <EffectsPanel
+                  params={params}
+                  onChange={handleParamChange}
+                  animatedState={animatedState}
+                  onAnimatedStateChange={handleAnimatedStateChange}
+                />
               )}
             </div>
           </>

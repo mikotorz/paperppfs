@@ -106,5 +106,59 @@ export function applyArtisticEffects(data: Uint8ClampedArray, w: number, h: numb
     }
   }
 
+  // Glitch slices
+  if (params.glitchSlices >= 1 && params.glitchOffset >= 1) {
+    d = applyGlitch(d, w, h, params)
+  }
+
+  // Scanlines
+  if (params.scanlines > 0) {
+    d = applyScanlines(d, w, h, params)
+  }
+
   return d
+}
+
+function seededRand(seed: number): () => number {
+  let s = seed >>> 0
+  return () => {
+    s = (Math.imul(s, 1664525) + 1013904223) >>> 0
+    return s / 0xFFFFFFFF
+  }
+}
+
+function applyGlitch(d: Uint8ClampedArray, w: number, h: number, params: AdjustmentParams): Uint8ClampedArray {
+  const out = new Uint8ClampedArray(d)
+  const rand = seededRand(params.glitchSlices * 1000 + params.glitchOffset)
+  const n = Math.round(params.glitchSlices)
+  for (let i = 0; i < n; i++) {
+    const y0 = Math.floor(rand() * h)
+    const sh = Math.floor(rand() * 8) + 2
+    const dx = Math.floor((rand() * 2 - 1) * params.glitchOffset)
+    for (let y = y0; y < Math.min(y0 + sh, h); y++) {
+      for (let x = 0; x < w; x++) {
+        const srcX = Math.min(Math.max(x - dx, 0), w - 1)
+        const oi = (y * w + x) * 4
+        const si = (y * w + srcX) * 4
+        out[oi] = d[si]
+        out[oi + 1] = d[si + 1]
+        out[oi + 2] = d[si + 2]
+      }
+    }
+  }
+  return out
+}
+
+function applyScanlines(d: Uint8ClampedArray, w: number, h: number, params: AdjustmentParams): Uint8ClampedArray {
+  const out = new Uint8ClampedArray(d)
+  const factor = (params.scanlines / 100) * 0.85
+  for (let y = 0; y < h; y += 2) {
+    for (let x = 0; x < w; x++) {
+      const i = (y * w + x) * 4
+      out[i] = clamp(out[i] * (1 - factor))
+      out[i + 1] = clamp(out[i + 1] * (1 - factor))
+      out[i + 2] = clamp(out[i + 2] * (1 - factor))
+    }
+  }
+  return out
 }

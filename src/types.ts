@@ -15,6 +15,16 @@ export interface AdjustmentParams {
   chromaticAberration: number
   pixelate: number
   emboss: number
+  glitchSlices: number
+  glitchOffset: number
+  scanlines: number
+}
+
+export type AnimatedEffect = 'none' | 'holographic' | 'crt'
+
+export interface AnimatedEffectState {
+  effect: AnimatedEffect
+  tilt3D: boolean
 }
 
 export type PresetName =
