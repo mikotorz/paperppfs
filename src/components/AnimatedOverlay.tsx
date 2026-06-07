@@ -5,9 +5,11 @@ import { drawHolographic, drawCRT, drawVHS, drawFilmReel, drawNeonPulse, drawRGB
 interface AnimatedOverlayProps {
   effect: AnimatedEffect
   mainCanvasRef: React.RefObject<HTMLCanvasElement | null>
+  tilt3D: boolean
+  tilt: { x: number; y: number }
 }
 
-export function AnimatedOverlay({ effect, mainCanvasRef }: AnimatedOverlayProps) {
+export function AnimatedOverlay({ effect, mainCanvasRef, tilt3D, tilt }: AnimatedOverlayProps) {
   const overlayRef = useRef<HTMLCanvasElement>(null)
   const rafRef = useRef<number>(0)
   const startTimeRef = useRef<number>(performance.now())
@@ -66,6 +68,10 @@ export function AnimatedOverlay({ effect, mainCanvasRef }: AnimatedOverlayProps)
       style={{
         position: 'absolute',
         pointerEvents: 'none',
+        transform: tilt3D
+          ? `perspective(800px) rotateY(${tilt.x}deg) rotateX(${-tilt.y}deg)`
+          : 'none',
+        transition: 'transform 0.05s linear',
       }}
     />
   )

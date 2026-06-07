@@ -65,19 +65,20 @@ export function Canvas({
         className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
         style={{
           imageRendering: 'auto',
-          transform: tilt3D
+          // Only tilt the canvas when no overlay is covering it; when an overlay is
+          // active the canvas is hidden and the overlay receives the tilt instead.
+          transform: tilt3D && animatedEffect === 'none'
             ? `perspective(800px) rotateY(${tilt.x}deg) rotateX(${-tilt.y}deg)`
             : 'none',
           transition: 'transform 0.05s linear',
-          // Hide main canvas when an effect overlay is active (overlay shows image+effect)
           visibility: animatedEffect !== 'none' ? 'hidden' : 'visible',
         }}
       />
       {animatedEffect !== 'none' && !WEBGL_EFFECTS.has(animatedEffect) && (
-        <AnimatedOverlay effect={animatedEffect} mainCanvasRef={canvasRef} />
+        <AnimatedOverlay effect={animatedEffect} mainCanvasRef={canvasRef} tilt3D={tilt3D} tilt={tilt} />
       )}
       {WEBGL_EFFECTS.has(animatedEffect) && (
-        <WebGLOverlay effect={animatedEffect} mainCanvasRef={canvasRef} />
+        <WebGLOverlay effect={animatedEffect} mainCanvasRef={canvasRef} tilt3D={tilt3D} tilt={tilt} />
       )}
       {showTheaterButton && (
         <button

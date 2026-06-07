@@ -6,9 +6,11 @@ import { createProgram, createQuadBuffer } from '../processors/webglUtils'
 interface WebGLOverlayProps {
   effect: AnimatedEffect
   mainCanvasRef: React.RefObject<HTMLCanvasElement | null>
+  tilt3D: boolean
+  tilt: { x: number; y: number }
 }
 
-export function WebGLOverlay({ effect, mainCanvasRef }: WebGLOverlayProps) {
+export function WebGLOverlay({ effect, mainCanvasRef, tilt3D, tilt }: WebGLOverlayProps) {
   const overlayRef = useRef<HTMLCanvasElement>(null)
   const glRef = useRef<WebGLRenderingContext | null>(null)
   const programCacheRef = useRef<Map<WebGLEffect, WebGLProgram>>(new Map())
@@ -164,6 +166,10 @@ export function WebGLOverlay({ effect, mainCanvasRef }: WebGLOverlayProps) {
       style={{
         position: 'absolute',
         pointerEvents: 'none',
+        transform: tilt3D
+          ? `perspective(800px) rotateY(${tilt.x}deg) rotateX(${-tilt.y}deg)`
+          : 'none',
+        transition: 'transform 0.05s linear',
       }}
     />
   )

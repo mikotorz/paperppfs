@@ -51,6 +51,7 @@ export default function App() {
     setFilename(name)
     setParams(DEFAULT_PARAMS)
     setActivePreset('none')
+    setAnimatedState({ effect: 'none', tilt3D: false, theaterMode: false })
     setIsCropMode(false)
     setCropRegion(null)
     setAspectRatio('free')
@@ -70,6 +71,10 @@ export default function App() {
   const handleReset = useCallback(() => {
     setParams(DEFAULT_PARAMS)
     setActivePreset('none')
+    setAnimatedState({ effect: 'none', tilt3D: false, theaterMode: false })
+    setIsCropMode(false)
+    setCropRegion(null)
+    setAspectRatio('free')
   }, [])
 
   const handleEnterCrop = useCallback(() => {
