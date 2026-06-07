@@ -1,7 +1,10 @@
-import { useState, useCallback } from 'react'
-import type { AdjustmentParams, AnimatedEffect } from '../types'
+import { useState, useCallback, useEffect } from 'react'
+import { clsx } from 'clsx'
+import type { AdjustmentParams, AnimatedEffect, AnimatedEffectState } from '../types'
 import { useImageProcessor } from '../hooks/useImageProcessor'
 import { AnimatedOverlay } from './AnimatedOverlay'
+import { WebGLOverlay } from './WebGLOverlay'
+import { WEBGL_EFFECTS } from '../processors/glslShaders'
 
 interface CanvasProps {
   sourceImage: HTMLImageElement
@@ -10,9 +13,14 @@ interface CanvasProps {
   cropOverlay?: React.ReactNode
   animatedEffect: AnimatedEffect
   tilt3D: boolean
+  theaterMode: boolean
+  onAnimatedStateChange: (partial: Partial<AnimatedEffectState>) => void
 }
 
-export function Canvas({ sourceImage, params, canvasRef, cropOverlay, animatedEffect, tilt3D }: CanvasProps) {
+export function Canvas({
+  sourceImage, params, canvasRef, cropOverlay,
+  animatedEffect, tilt3D, theaterMode, onAnimatedStateChange,
+}: CanvasProps) {
   useImageProcessor(sourceImage, params, canvasRef)
 
   const [tilt, setTilt] = useState({ x: 0, y: 0 })
@@ -29,9 +37,26 @@ export function Canvas({ sourceImage, params, canvasRef, cropOverlay, animatedEf
     setTilt({ x: 0, y: 0 })
   }, [])
 
+  // Escape key exits theater mode
+  useEffect(() => {
+    if (!theaterMode) return
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onAnimatedStateChange({ theaterMode: false })
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [theaterMode, onAnimatedStateChange])
+
+  const showTheaterButton = animatedEffect !== 'none' || theaterMode
+
   return (
     <div
-      className="relative flex h-full w-full items-center justify-center p-4 overflow-hidden"
+      className={clsx(
+        'flex items-center justify-center p-4 overflow-hidden',
+        theaterMode
+          ? 'fixed inset-0 z-50 bg-black'
+          : 'relative h-full w-full',
+      )}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
     >
@@ -44,10 +69,32 @@ export function Canvas({ sourceImage, params, canvasRef, cropOverlay, animatedEf
             ? `perspective(800px) rotateY(${tilt.x}deg) rotateX(${-tilt.y}deg)`
             : 'none',
           transition: 'transform 0.05s linear',
+          // Hide main canvas when an effect overlay is active (overlay shows image+effect)
+          visibility: animatedEffect !== 'none' ? 'hidden' : 'visible',
         }}
       />
-      {animatedEffect !== 'none' && (
+      {animatedEffect !== 'none' && !WEBGL_EFFECTS.has(animatedEffect) && (
         <AnimatedOverlay effect={animatedEffect} mainCanvasRef={canvasRef} />
+      )}
+      {WEBGL_EFFECTS.has(animatedEffect) && (
+        <WebGLOverlay effect={animatedEffect} mainCanvasRef={canvasRef} />
+      )}
+      {showTheaterButton && (
+        <button
+          onClick={() => onAnimatedStateChange({ theaterMode: !theaterMode })}
+          title={theaterMode ? 'Exit theater mode (Esc)' : 'Theater mode'}
+          className="absolute top-2 right-2 z-10 rounded p-1.5 text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+        >
+          {theaterMode ? (
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <path d="M6 2H2v4M10 2h4v4M6 14H2v-4M10 14h4v-4"/>
+            </svg>
+          ) : (
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <path d="M2 6V2h4M10 2h4v4M14 10v4h-4M6 14H2v-4"/>
+            </svg>
+          )}
+        </button>
       )}
       {cropOverlay}
     </div>

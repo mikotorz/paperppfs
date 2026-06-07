@@ -26,15 +26,24 @@ export function AnimatedOverlay({ effect, mainCanvasRef }: AnimatedOverlayProps)
       const mainCanvas = mainCanvasRef.current
       if (!mainCanvas) { rafRef.current = requestAnimationFrame(tick); return }
 
-      const w = mainCanvas.clientWidth
-      const h = mainCanvas.clientHeight
+      const mainRect = mainCanvas.getBoundingClientRect()
+      const parentRect = canvas.parentElement!.getBoundingClientRect()
+      const left = mainRect.left - parentRect.left
+      const top = mainRect.top - parentRect.top
+      const w = Math.round(mainRect.width)
+      const h = Math.round(mainRect.height)
       if (canvas.width !== w) canvas.width = w
       if (canvas.height !== h) canvas.height = h
+      canvas.style.left = `${left}px`
+      canvas.style.top = `${top}px`
+      canvas.style.width = `${w}px`
+      canvas.style.height = `${h}px`
 
       const ctx = canvas.getContext('2d')
       if (!ctx) { rafRef.current = requestAnimationFrame(tick); return }
 
       ctx.clearRect(0, 0, w, h)
+      ctx.drawImage(mainCanvas, 0, 0, w, h)
       const t = (now - startTimeRef.current) / 1000
 
       if (effect === 'holographic') drawHolographic(ctx, w, h, t)
@@ -56,9 +65,6 @@ export function AnimatedOverlay({ effect, mainCanvasRef }: AnimatedOverlayProps)
       ref={overlayRef}
       style={{
         position: 'absolute',
-        inset: 0,
-        width: '100%',
-        height: '100%',
         pointerEvents: 'none',
       }}
     />

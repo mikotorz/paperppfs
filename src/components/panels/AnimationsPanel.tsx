@@ -6,7 +6,9 @@ interface Props {
   onAnimatedStateChange: (partial: Partial<AnimatedEffectState>) => void
 }
 
-const ANIMATED_EFFECTS: { id: AnimatedEffect; label: string }[] = [
+type EffectEntry = { id: AnimatedEffect; label: string } | { divider: true; label: string }
+
+const ANIMATED_EFFECTS: EffectEntry[] = [
   { id: 'none', label: 'Off' },
   { id: 'holographic', label: 'Holo' },
   { id: 'crt', label: 'CRT' },
@@ -14,6 +16,11 @@ const ANIMATED_EFFECTS: { id: AnimatedEffect; label: string }[] = [
   { id: 'filmreel', label: 'Film' },
   { id: 'neonpulse', label: 'Neon' },
   { id: 'rgbjitter', label: 'RGB' },
+  { divider: true, label: 'GLSL' },
+  { id: 'plasma', label: 'Plasma' },
+  { id: 'aurora', label: 'Aurora' },
+  { id: 'ripple', label: 'Ripple' },
+  { id: 'starfield', label: 'Stars' },
 ]
 
 export function AnimationsPanel({ animatedState, onAnimatedStateChange }: Props) {
@@ -25,20 +32,30 @@ export function AnimationsPanel({ animatedState, onAnimatedStateChange }: Props)
 
 
       <div className="grid grid-cols-3 gap-1.5">
-        {ANIMATED_EFFECTS.map(({ id, label }) => (
-          <button
-            key={id}
-            onClick={() => onAnimatedStateChange({ effect: id })}
-            className={clsx(
-              'text-xs py-2 rounded transition-colors',
-              animatedState.effect === id
-                ? 'bg-violet-600 text-white'
-                : 'bg-zinc-700 text-zinc-300 hover:bg-zinc-600',
-            )}
-          >
-            {label}
-          </button>
-        ))}
+        {ANIMATED_EFFECTS.map((entry) => {
+          if ('divider' in entry) {
+            return (
+              <div key={entry.label} className="col-span-3 text-xs text-zinc-500 uppercase tracking-wider mt-1">
+                {entry.label}
+              </div>
+            )
+          }
+          const { id, label } = entry
+          return (
+            <button
+              key={id}
+              onClick={() => onAnimatedStateChange({ effect: id })}
+              className={clsx(
+                'text-xs py-2 rounded transition-colors',
+                animatedState.effect === id
+                  ? 'bg-violet-600 text-white'
+                  : 'bg-zinc-700 text-zinc-300 hover:bg-zinc-600',
+              )}
+            >
+              {label}
+            </button>
+          )
+        })}
       </div>
 
       <label className="flex items-center gap-2 cursor-pointer">

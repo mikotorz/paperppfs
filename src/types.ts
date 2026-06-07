@@ -35,11 +35,14 @@ export interface AdjustmentParams {
   duotoneHighlightColor: [number, number, number]
 }
 
-export type AnimatedEffect = 'none' | 'holographic' | 'crt' | 'vhs' | 'filmreel' | 'neonpulse' | 'rgbjitter'
+export type AnimatedEffect =
+  | 'none' | 'holographic' | 'crt' | 'vhs' | 'filmreel' | 'neonpulse' | 'rgbjitter'
+  | 'plasma' | 'aurora' | 'ripple' | 'starfield'
 
 export interface AnimatedEffectState {
   effect: AnimatedEffect
   tilt3D: boolean
+  theaterMode: boolean
 }
 
 export type PresetName =

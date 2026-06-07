@@ -38,6 +38,7 @@ export default function App() {
   const [animatedState, setAnimatedState] = useState<AnimatedEffectState>({
     effect: 'none',
     tilt3D: false,
+    theaterMode: false,
   })
   const [animateWarningAcknowledged, setAnimateWarningAcknowledged] = useState(false)
 
@@ -144,6 +145,8 @@ export default function App() {
           canvasRef={canvasRef}
           animatedEffect={animatedState.effect}
           tilt3D={animatedState.tilt3D}
+          theaterMode={animatedState.theaterMode}
+          onAnimatedStateChange={handleAnimatedStateChange}
           cropOverlay={
             isCropMode ? (
               <CropOverlay
