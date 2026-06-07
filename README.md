@@ -12,7 +12,7 @@ A browser-based photo editing tool with filters, effects, color grading, and cro
 
 - **Crop** — Free-draw or constrained by aspect ratio (1:1, 4:3, 16:9, 2:3, 5:7 and portrait flips); drag to reposition the selection
 - **Basic Adjustments** — Brightness, contrast, saturation, sharpness, and Gaussian blur
-- **Filter Presets** — One-click presets: Vintage, Noir, Vivid, Faded, Warm, Cool, Matte, Chrome, Fade
+- **Filter Presets** — One-click presets: Vintage, Noir, Vivid, Faded, Warm, Cool, Matte, Chrome, Fade, Newsprint, Cross-X, Cine Glow
 - **Color Grading** — Hue rotation, per-channel RGB balance, shadow/highlight split-tone
 - **Artistic Effects** — Vignette, film grain, chromatic aberration, pixelate, emboss, glitch, scanlines, cross-process, duotone, light leak, halftone, bloom
 - **Animated Overlays** — Holographic, CRT, VHS, Film Reel, Neon Pulse, RGB Jitter (preview only, not exported)
@@ -37,11 +37,12 @@ Produces a `dist/` folder that works as a fully static site — open `dist/index
 
 ## Tech Stack
 
-- [React 18](https://react.dev/) + TypeScript
+- [React 19](https://react.dev/) + TypeScript
 - [Vite](https://vite.dev/)
 - [Tailwind CSS v4](https://tailwindcss.com/)
 - Canvas 2D API for pixel-level image processing
 - Web Worker for non-blocking full-resolution rendering
+- [Vitest](https://vitest.dev/) — 79 tests across processors, utilities, crop math, color conversion, and preset data integrity
 
 ## How It Works
 
@@ -50,5 +51,5 @@ Every adjustment runs a pixel pipeline entirely in the browser:
 1. Source pixels are extracted from the uploaded image once and kept immutable
 2. On each slider change, a **downsampled preview** (≤ 1200px) is rendered immediately via `requestAnimationFrame` — fast enough to stay smooth during drags
 3. After edits settle (~300 ms), the full-resolution pipeline runs in a **Web Worker** so the main thread is never blocked
-4. All three stages — adjustments → color grading → artistic effects — are applied to the pixel buffer without touching any server
+4. The pipeline is a **registry of composable processors** — adjustments → color grading → artistic effects — each typed against a narrow param slice rather than the full settings object, so adding a new effect only touches its processor and panel
 5. Crop replaces the source image with the selected region, resetting the pipeline to the cropped pixels

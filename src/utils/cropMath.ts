@@ -48,3 +48,26 @@ export function clampRegion(region: CropRegion, imgW: number, imgH: number): Cro
 export function snapToAspectRatio(region: CropRegion, ratio: number): CropRegion {
   return { ...region, height: region.width / ratio }
 }
+
+export function hitTest(x: number, y: number, region: CropRegion): boolean {
+  return x >= region.x && x <= region.x + region.width &&
+         y >= region.y && y <= region.y + region.height
+}
+
+export function buildRegion(
+  startX: number,
+  startY: number,
+  endX: number,
+  endY: number,
+  ratio: number | null,
+  imageWidth: number,
+  imageHeight: number,
+): CropRegion | null {
+  const x = Math.min(startX, endX)
+  const y = Math.min(startY, endY)
+  let width = Math.abs(endX - startX)
+  let height = Math.abs(endY - startY)
+  if (ratio !== null) height = width / ratio
+  if (width < 5 || height < 5) return null
+  return clampRegion({ x, y, width, height }, imageWidth, imageHeight)
+}

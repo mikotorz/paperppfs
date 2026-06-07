@@ -1,10 +1,10 @@
-import type { AdjustmentParams } from '../types'
+import type { EffectsParams } from '../types'
 
 function clamp(v: number): number {
   return v < 0 ? 0 : v > 255 ? 255 : v
 }
 
-export function applyArtisticEffects(data: Uint8ClampedArray, w: number, h: number, params: AdjustmentParams): Uint8ClampedArray {
+export function applyArtisticEffects(data: Uint8ClampedArray, w: number, h: number, params: EffectsParams): Uint8ClampedArray {
   let d = new Uint8ClampedArray(data)
 
   // Emboss
@@ -152,7 +152,7 @@ function seededRand(seed: number): () => number {
   }
 }
 
-function applyGlitch(d: Uint8ClampedArray, w: number, h: number, params: AdjustmentParams): Uint8ClampedArray {
+function applyGlitch(d: Uint8ClampedArray, w: number, h: number, params: Pick<EffectsParams, 'glitchSlices' | 'glitchOffset'>): Uint8ClampedArray {
   const out = new Uint8ClampedArray(d)
   const rand = seededRand(params.glitchSlices * 1000 + params.glitchOffset)
   const n = Math.round(params.glitchSlices)
@@ -174,7 +174,7 @@ function applyGlitch(d: Uint8ClampedArray, w: number, h: number, params: Adjustm
   return out
 }
 
-function applyScanlines(d: Uint8ClampedArray, w: number, h: number, params: AdjustmentParams): Uint8ClampedArray {
+function applyScanlines(d: Uint8ClampedArray, w: number, h: number, params: Pick<EffectsParams, 'scanlines'>): Uint8ClampedArray {
   const out = new Uint8ClampedArray(d)
   const factor = (params.scanlines / 100) * 0.85
   for (let y = 0; y < h; y += 2) {
@@ -213,7 +213,7 @@ function applyCrossProcess(d: Uint8ClampedArray, w: number, h: number, strength:
   return out
 }
 
-function applyDuotone(d: Uint8ClampedArray, w: number, h: number, params: AdjustmentParams): Uint8ClampedArray {
+function applyDuotone(d: Uint8ClampedArray, w: number, h: number, params: Pick<EffectsParams, 'duotoneStrength' | 'duotoneShadowColor' | 'duotoneHighlightColor'>): Uint8ClampedArray {
   const s = params.duotoneStrength / 100
   const [sr, sg, sb] = params.duotoneShadowColor
   const [hr, hg, hb] = params.duotoneHighlightColor
@@ -314,7 +314,7 @@ function separableBlur(src: Uint8ClampedArray, w: number, h: number, radius: num
   return out
 }
 
-function applyBloom(d: Uint8ClampedArray, w: number, h: number, params: AdjustmentParams): Uint8ClampedArray {
+function applyBloom(d: Uint8ClampedArray, w: number, h: number, params: Pick<EffectsParams, 'bloomStrength' | 'bloomThreshold' | 'bloomRadius'>): Uint8ClampedArray {
   const s = params.bloomStrength / 100
   const thresh = params.bloomThreshold
   const radius = Math.max(1, Math.round(params.bloomRadius))
@@ -337,7 +337,7 @@ function applyBloom(d: Uint8ClampedArray, w: number, h: number, params: Adjustme
   return out
 }
 
-function applyHalftone(d: Uint8ClampedArray, w: number, h: number, params: AdjustmentParams): Uint8ClampedArray {
+function applyHalftone(d: Uint8ClampedArray, w: number, h: number, params: Pick<EffectsParams, 'halftoneSize' | 'halftoneAngle' | 'halftoneCMYK'>): Uint8ClampedArray {
   const bs = Math.round(params.halftoneSize)
   if (params.halftoneCMYK) {
     return applyHalftoneCMYK(d, w, h, bs)

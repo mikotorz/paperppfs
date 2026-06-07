@@ -1,4 +1,4 @@
-import type { AdjustmentParams } from '../types'
+import type { AdjustParams } from '../types'
 
 function clamp(v: number): number {
   return v < 0 ? 0 : v > 255 ? 255 : v
@@ -61,7 +61,7 @@ function separableBlur(src: Uint8ClampedArray, w: number, h: number, radius: num
   return dst
 }
 
-export function applyAdjustments(data: Uint8ClampedArray, w: number, h: number, params: AdjustmentParams): Uint8ClampedArray {
+export function applyAdjustments(data: Uint8ClampedArray, w: number, h: number, params: AdjustParams): Uint8ClampedArray {
   let d = new Uint8ClampedArray(data)
 
   // Brightness

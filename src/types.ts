@@ -63,6 +63,26 @@ export interface Preset {
   params: AdjustmentParams
 }
 
+// Narrow param slices — each processor declares only the fields it reads.
+// AdjustmentParams structurally satisfies all of these (superset), so call
+// sites passing the full params object never need to change.
+export type AdjustParams = Pick<AdjustmentParams,
+  'brightness' | 'contrast' | 'saturation' | 'sharpness' | 'blur'
+>
+
+export type GradingParams = Pick<AdjustmentParams,
+  'hueRotation' | 'redBalance' | 'greenBalance' | 'blueBalance' | 'shadowTint' | 'highlightTint'
+>
+
+export type EffectsParams = Pick<AdjustmentParams,
+  | 'vignette' | 'grain' | 'chromaticAberration' | 'pixelate' | 'emboss'
+  | 'glitchSlices' | 'glitchOffset' | 'scanlines'
+  | 'halftoneSize' | 'halftoneAngle' | 'halftoneCMYK'
+  | 'crossProcessStrength' | 'lightLeakStrength'
+  | 'bloomStrength' | 'bloomRadius' | 'bloomThreshold'
+  | 'duotoneStrength' | 'duotoneShadowColor' | 'duotoneHighlightColor'
+>
+
 export type ActiveTab = 'adjustments' | 'filters' | 'grading' | 'effects' | 'animate'
 
 export interface CropRegion {

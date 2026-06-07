@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { clampRegion, snapToAspectRatio, displayToImage } from '../cropMath'
+import { clampRegion, snapToAspectRatio, displayToImage, hitTest, buildRegion } from '../cropMath'
 import type { CropRegion } from '../../types'
 
 function region(x: number, y: number, width: number, height: number): CropRegion {
@@ -100,5 +100,65 @@ describe('clampRegion', () => {
     const out = clampRegion(region(0, 0, 0, -5), 200, 200)
     expect(out.width).toBeGreaterThanOrEqual(1)
     expect(out.height).toBeGreaterThanOrEqual(1)
+  })
+})
+
+// ─── hitTest ────────────────────────────────────────────────────────────────
+
+describe('hitTest', () => {
+  it('point inside region returns true', () => {
+    expect(hitTest(50, 50, region(10, 10, 100, 100))).toBe(true)
+  })
+
+  it('point at top-left corner returns true', () => {
+    expect(hitTest(10, 10, region(10, 10, 100, 100))).toBe(true)
+  })
+
+  it('point at bottom-right corner returns true', () => {
+    expect(hitTest(110, 110, region(10, 10, 100, 100))).toBe(true)
+  })
+
+  it('point outside region returns false', () => {
+    expect(hitTest(5, 50, region(10, 10, 100, 100))).toBe(false)
+    expect(hitTest(50, 5, region(10, 10, 100, 100))).toBe(false)
+    expect(hitTest(111, 50, region(10, 10, 100, 100))).toBe(false)
+    expect(hitTest(50, 111, region(10, 10, 100, 100))).toBe(false)
+  })
+})
+
+// ─── buildRegion ────────────────────────────────────────────────────────────
+
+describe('buildRegion', () => {
+  it('returns null when resulting region is too small', () => {
+    expect(buildRegion(0, 0, 3, 3, null, 500, 500)).toBeNull()
+  })
+
+  it('normalises inverted drag (end before start)', () => {
+    const r = buildRegion(100, 100, 10, 10, null, 500, 500)
+    expect(r).not.toBeNull()
+    expect(r!.x).toBe(10)
+    expect(r!.y).toBe(10)
+    expect(r!.width).toBe(90)
+    expect(r!.height).toBe(90)
+  })
+
+  it('applies aspect ratio when provided', () => {
+    const r = buildRegion(0, 0, 100, 999, 2, 500, 500)
+    expect(r).not.toBeNull()
+    expect(r!.height).toBeCloseTo(50)  // width=100, ratio=2 → height=50
+  })
+
+  it('clamps result to image bounds', () => {
+    const r = buildRegion(480, 480, 600, 600, null, 500, 500)
+    expect(r).not.toBeNull()
+    expect(r!.x + r!.width).toBeLessThanOrEqual(500)
+    expect(r!.y + r!.height).toBeLessThanOrEqual(500)
+  })
+
+  it('free ratio (null) uses raw height from drag', () => {
+    const r = buildRegion(0, 0, 80, 60, null, 500, 500)
+    expect(r).not.toBeNull()
+    expect(r!.width).toBe(80)
+    expect(r!.height).toBe(60)
   })
 })

@@ -3,6 +3,21 @@ import { applyAdjustments } from './adjustments'
 import { applyColorGrading } from './colorGrading'
 import { applyArtisticEffects } from './artisticEffects'
 
+// Each entry wraps its processor so the registry is typed uniformly on
+// AdjustmentParams (a structural superset of every narrow param type).
+type ProcessorFn = (
+  data: Uint8ClampedArray,
+  w: number,
+  h: number,
+  params: AdjustmentParams,
+) => Uint8ClampedArray
+
+const PROCESSORS: ProcessorFn[] = [
+  (d, w, h, p) => applyAdjustments(d, w, h, p),
+  (d, w, h, p) => applyColorGrading(d, w, h, p),
+  (d, w, h, p) => applyArtisticEffects(d, w, h, p),
+]
+
 export function processPipeline(
   data: Uint8ClampedArray,
   w: number,
@@ -10,9 +25,9 @@ export function processPipeline(
   params: AdjustmentParams,
 ): Uint8ClampedArray {
   let pixels = new Uint8ClampedArray(data)
-  pixels = applyAdjustments(pixels, w, h, params)
-  pixels = applyColorGrading(pixels, w, h, params)
-  pixels = applyArtisticEffects(pixels, w, h, params)
+  for (const apply of PROCESSORS) {
+    pixels = apply(pixels, w, h, params)
+  }
   return pixels
 }
 

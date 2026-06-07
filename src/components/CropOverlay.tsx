@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { AspectRatioPreset, CropRegion } from '../types'
 import { ASPECT_RATIO_PRESETS } from '../constants/cropPresets'
-import { clampRegion, displayToImage, imageToOverlay, snapToAspectRatio } from '../utils/cropMath'
+import { clampRegion, displayToImage, hitTest, buildRegion, imageToOverlay } from '../utils/cropMath'
 
 interface CropOverlayProps {
   imageWidth: number
@@ -96,29 +96,13 @@ export function CropOverlay({
     return () => window.removeEventListener('resize', handleResize)
   }, [paint])
 
-  const buildRegion = useCallback((startX: number, startY: number, endX: number, endY: number): CropRegion | null => {
-    const x = Math.min(startX, endX)
-    const y = Math.min(startY, endY)
-    let width = Math.abs(endX - startX)
-    let height = Math.abs(endY - startY)
-    const ratio = getAspectRatio()
-    if (ratio !== null) height = width / ratio
-    if (width < 5 || height < 5) return null
-    return clampRegion({ x, y, width, height }, imageWidth, imageHeight)
-  }, [getAspectRatio, imageWidth, imageHeight])
-
-  const hitTest = useCallback((x: number, y: number, region: CropRegion) =>
-    x >= region.x && x <= region.x + region.width &&
-    y >= region.y && y <= region.y + region.height,
-  [], [])
-
   const onMouseMove = useCallback((e: React.MouseEvent) => {
     if (isDraggingRef.current) return
     const imageCanvas = canvasRef.current
     if (!imageCanvas) return
     const { x, y } = displayToImage(e.clientX, e.clientY, imageCanvas, imageWidth, imageHeight)
     setCursor(cropRegion && hitTest(x, y, cropRegion) ? 'move' : 'crosshair')
-  }, [canvasRef, imageWidth, imageHeight, cropRegion, hitTest])
+  }, [canvasRef, imageWidth, imageHeight, cropRegion])
 
   const onMouseLeave = useCallback(() => {
     if (!isDraggingRef.current) setCursor('crosshair')
@@ -142,7 +126,7 @@ export function CropOverlay({
     }
     isDraggingRef.current = true
     setIsDragging(true)
-  }, [canvasRef, imageWidth, imageHeight, cropRegion, hitTest, onCropChange])
+  }, [canvasRef, imageWidth, imageHeight, cropRegion, onCropChange])
 
   useEffect(() => {
     if (!isDragging) return
@@ -158,7 +142,7 @@ export function CropOverlay({
         const ny = Math.max(0, Math.min(imageHeight - snap.height, ey - moveOffset.current.y))
         onCropChange({ ...snap, x: nx, y: ny })
       } else if (dragMode.current === 'draw' && dragStart.current) {
-        onCropChange(buildRegion(dragStart.current.x, dragStart.current.y, ex, ey))
+        onCropChange(buildRegion(dragStart.current.x, dragStart.current.y, ex, ey, getAspectRatio(), imageWidth, imageHeight))
       }
     }
 
@@ -173,7 +157,7 @@ export function CropOverlay({
         const ny = Math.max(0, Math.min(imageHeight - snap.height, ey - moveOffset.current.y))
         onCropChange({ ...snap, x: nx, y: ny })
       } else if (dragMode.current === 'draw' && dragStart.current) {
-        onCropChange(buildRegion(dragStart.current.x, dragStart.current.y, ex, ey))
+        onCropChange(buildRegion(dragStart.current.x, dragStart.current.y, ex, ey, getAspectRatio(), imageWidth, imageHeight))
       }
 
       dragStart.current = null
@@ -189,7 +173,7 @@ export function CropOverlay({
       window.removeEventListener('mousemove', onMove)
       window.removeEventListener('mouseup', onUp)
     }
-  }, [isDragging, buildRegion, canvasRef, imageWidth, imageHeight, onCropChange])
+  }, [isDragging, getAspectRatio, canvasRef, imageWidth, imageHeight, onCropChange])
 
   return (
     <canvas

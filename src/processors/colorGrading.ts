@@ -1,4 +1,4 @@
-import type { AdjustmentParams } from '../types'
+import type { GradingParams } from '../types'
 
 function clamp(v: number): number {
   return v < 0 ? 0 : v > 255 ? 255 : v
@@ -41,7 +41,7 @@ function rgbToHsl(r: number, g: number, b: number): [number, number, number] {
   return [h * 360, s, l]
 }
 
-export function applyColorGrading(data: Uint8ClampedArray, _w: number, _h: number, params: AdjustmentParams): Uint8ClampedArray {
+export function applyColorGrading(data: Uint8ClampedArray, _w: number, _h: number, params: GradingParams): Uint8ClampedArray {
   const d = new Uint8ClampedArray(data)
 
   const hueShift = params.hueRotation
