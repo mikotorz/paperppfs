@@ -14,8 +14,8 @@ A browser-based photo editing tool with filters, effects, color grading, and cro
 - **Basic Adjustments** — Brightness, contrast, saturation, sharpness, and Gaussian blur
 - **Filter Presets** — One-click presets: Vintage, Noir, Vivid, Faded, Warm, Cool, Matte, Chrome, Fade, Newsprint, Cross-X, Cine Glow
 - **Color Grading** — Hue rotation, per-channel RGB balance, shadow/highlight split-tone
-- **Artistic Effects** — Vignette, film grain, chromatic aberration, pixelate, emboss, glitch, scanlines, cross-process, duotone, light leak, halftone, bloom
-- **Animated Overlays** — Holographic, CRT, VHS, Film Reel, Neon Pulse, RGB Jitter (canvas 2D); Plasma, Aurora, Ripple, Starfield (WebGL GLSL shaders) — preview only, not exported
+- **Artistic Effects** — Vignette, film grain, chromatic aberration, pixelate, emboss, glitch, scanlines, cross-process, duotone, light leak, halftone, bloom, sepia, posterize, neon edges, comic
+- **Animated Overlays** — Holographic, CRT, VHS, Film Reel, Neon Pulse, RGB Jitter (canvas 2D); Lightning, Rain, Fire, Matrix (canvas 2D); Plasma, Aurora, Ripple, Starfield, Liquid, Vortex, Infrared, Glitch Drop, Crystal (WebGL GLSL shaders) — preview only, not exported
 - **3D Tilt** — Mouse-parallax perspective tilt on the image, combinable with any animated overlay
 - **Theater Mode** — Fullscreen overlay for previewing animated effects; dismiss with Esc
 - **Export** — Download the edited image as a lossless PNG
@@ -45,7 +45,7 @@ Produces a `dist/` folder that works as a fully static site — open `dist/index
 - Canvas 2D API for pixel-level image processing
 - WebGL for GPU-accelerated GLSL shader effects
 - Web Worker for non-blocking full-resolution rendering
-- [Vitest](https://vitest.dev/) — 95 tests across processors, utilities, crop math, color conversion, preset data integrity, and shader coverage
+- [Vitest](https://vitest.dev/) — 111 tests across processors, utilities, crop math, color conversion, preset data integrity, and shader coverage
 
 ## How It Works
 

@@ -141,6 +141,26 @@ export function applyArtisticEffects(data: Uint8ClampedArray, w: number, h: numb
     d = applyBloom(d, w, h, params)
   }
 
+  // Sepia
+  if (params.sepiaStrength > 0) {
+    d = applySepia(d, w, h, params.sepiaStrength)
+  }
+
+  // Posterize
+  if (params.posterizeStrength > 0) {
+    d = applyPosterize(d, w, h, params.posterizeStrength)
+  }
+
+  // Neon Edges
+  if (params.neonEdgesStrength > 0) {
+    d = applyNeonEdges(d, w, h, params.neonEdgesStrength)
+  }
+
+  // Comic
+  if (params.comicStrength > 0) {
+    d = applyComic(d, w, h, params.comicStrength)
+  }
+
   return d
 }
 
@@ -333,6 +353,123 @@ function applyBloom(d: Uint8ClampedArray, w: number, h: number, params: Pick<Eff
     out[i]     = clamp(d[i]     + blurred[i]     * s)
     out[i + 1] = clamp(d[i + 1] + blurred[i + 1] * s)
     out[i + 2] = clamp(d[i + 2] + blurred[i + 2] * s)
+  }
+  return out
+}
+
+function applySepia(d: Uint8ClampedArray, w: number, h: number, strength: number): Uint8ClampedArray {
+  const s = strength / 100
+  const out = new Uint8ClampedArray(d)
+  const n = w * h * 4
+  for (let i = 0; i < n; i += 4) {
+    const r = d[i], g = d[i + 1], b = d[i + 2]
+    const sr = clamp(0.393 * r + 0.769 * g + 0.189 * b)
+    const sg = clamp(0.349 * r + 0.686 * g + 0.168 * b)
+    const sb = clamp(0.272 * r + 0.534 * g + 0.131 * b)
+    out[i]     = clamp(r + s * (sr - r))
+    out[i + 1] = clamp(g + s * (sg - g))
+    out[i + 2] = clamp(b + s * (sb - b))
+  }
+  return out
+}
+
+function applyPosterize(d: Uint8ClampedArray, w: number, h: number, strength: number): Uint8ClampedArray {
+  const s = strength / 100
+  const levels = Math.round(2 + s * 6)
+  const step = 256 / levels
+  const out = new Uint8ClampedArray(d)
+  const n = w * h * 4
+  for (let i = 0; i < n; i += 4) {
+    for (let c = 0; c < 3; c++) {
+      const v = d[i + c]
+      const pv = clamp(Math.floor(v / step) * (255 / (levels - 1)))
+      out[i + c] = clamp(v + s * (pv - v))
+    }
+  }
+  return out
+}
+
+function hsvToRgb(h: number, s: number, v: number): [number, number, number] {
+  const i = Math.floor(h * 6)
+  const f = h * 6 - i
+  const p = v * (1 - s)
+  const q = v * (1 - f * s)
+  const t = v * (1 - (1 - f) * s)
+  let r = 0, g = 0, b = 0
+  switch (i % 6) {
+    case 0: r = v; g = t; b = p; break
+    case 1: r = q; g = v; b = p; break
+    case 2: r = p; g = v; b = t; break
+    case 3: r = p; g = q; b = v; break
+    case 4: r = t; g = p; b = v; break
+    case 5: r = v; g = p; b = q; break
+  }
+  return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)]
+}
+
+function sobelEdges(d: Uint8ClampedArray, w: number, h: number): { mag: Uint8ClampedArray; angle: Float32Array } {
+  const mag = new Uint8ClampedArray(w * h)
+  const angle = new Float32Array(w * h)
+  const sobelX = [-1, 0, 1, -2, 0, 2, -1, 0, 1]
+  const sobelY = [-1, -2, -1, 0, 0, 0, 1, 2, 1]
+  for (let y = 1; y < h - 1; y++) {
+    for (let x = 1; x < w - 1; x++) {
+      let gx = 0, gy = 0
+      for (let ky = -1; ky <= 1; ky++) {
+        for (let kx = -1; kx <= 1; kx++) {
+          const si = ((y + ky) * w + (x + kx)) * 4
+          const luma = 0.299 * d[si] + 0.587 * d[si + 1] + 0.114 * d[si + 2]
+          const k = (ky + 1) * 3 + (kx + 1)
+          gx += luma * sobelX[k]
+          gy += luma * sobelY[k]
+        }
+      }
+      const idx = y * w + x
+      mag[idx] = clamp(Math.sqrt(gx * gx + gy * gy) / 4)
+      angle[idx] = Math.atan2(gy, gx)
+    }
+  }
+  return { mag, angle }
+}
+
+function applyNeonEdges(d: Uint8ClampedArray, w: number, h: number, strength: number): Uint8ClampedArray {
+  const s = strength / 100
+  const { mag, angle } = sobelEdges(d, w, h)
+  const out = new Uint8ClampedArray(d)
+  const n = w * h * 4
+  for (let i = 0; i < n; i += 4) {
+    const idx = i / 4
+    const m = mag[idx] / 255
+    const hue = (angle[idx] + Math.PI) / (Math.PI * 2)
+    const [er, eg, eb] = hsvToRgb(hue, 1.0, m)
+
+    const darkR = d[i]     * (1 - s * 0.85)
+    const darkG = d[i + 1] * (1 - s * 0.85)
+    const darkB = d[i + 2] * (1 - s * 0.85)
+
+    out[i]     = clamp((1 - (1 - darkR / 255) * (1 - er / 255)) * 255)
+    out[i + 1] = clamp((1 - (1 - darkG / 255) * (1 - eg / 255)) * 255)
+    out[i + 2] = clamp((1 - (1 - darkB / 255) * (1 - eb / 255)) * 255)
+  }
+  return out
+}
+
+function applyComic(d: Uint8ClampedArray, w: number, h: number, strength: number): Uint8ClampedArray {
+  const s = strength / 100
+  const posterized = applyPosterize(d, w, h, 30)
+  const { mag } = sobelEdges(d, w, h)
+  const out = new Uint8ClampedArray(d)
+  const n = w * h * 4
+  for (let i = 0; i < n; i += 4) {
+    const idx = i / 4
+    const outline = (mag[idx] / 255) * s
+    const pr = posterized[i]     * (1 - outline * 0.9)
+    const pg = posterized[i + 1] * (1 - outline * 0.9)
+    const pb = posterized[i + 2] * (1 - outline * 0.9)
+    out[i]     = clamp(d[i]     + s * (pr - d[i]))
+    out[i + 1] = clamp(d[i + 1] + s * (pg - d[i + 1]))
+    out[i + 2] = clamp(d[i + 2] + s * (pb - d[i + 2]))
+    out[i + 3] = d[i + 3]
   }
   return out
 }

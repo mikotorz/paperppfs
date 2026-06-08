@@ -31,4 +31,8 @@ export const DEFAULT_PARAMS: AdjustmentParams = {
   duotoneStrength: 0,
   duotoneShadowColor: [0, 0, 0],
   duotoneHighlightColor: [255, 255, 255],
+  sepiaStrength: 0,
+  posterizeStrength: 0,
+  neonEdgesStrength: 0,
+  comicStrength: 0,
 }

@@ -33,11 +33,18 @@ export interface AdjustmentParams {
   duotoneStrength: number
   duotoneShadowColor: [number, number, number]
   duotoneHighlightColor: [number, number, number]
+  // Artistic
+  sepiaStrength: number
+  posterizeStrength: number
+  neonEdgesStrength: number
+  comicStrength: number
 }
 
 export type AnimatedEffect =
   | 'none' | 'holographic' | 'crt' | 'vhs' | 'filmreel' | 'neonpulse' | 'rgbjitter'
   | 'plasma' | 'aurora' | 'ripple' | 'starfield'
+  | 'liquid' | 'vortex' | 'infrared' | 'glitchdrop' | 'crystal'
+  | 'lightning' | 'rain' | 'fire' | 'matrix'
 
 export interface AnimatedEffectState {
   effect: AnimatedEffect
@@ -84,6 +91,7 @@ export type EffectsParams = Pick<AdjustmentParams,
   | 'crossProcessStrength' | 'lightLeakStrength'
   | 'bloomStrength' | 'bloomRadius' | 'bloomThreshold'
   | 'duotoneStrength' | 'duotoneShadowColor' | 'duotoneHighlightColor'
+  | 'sepiaStrength' | 'posterizeStrength' | 'neonEdgesStrength' | 'comicStrength'
 >
 
 export type ActiveTab = 'film' | 'digital' | 'print' | 'animate' | 'edit'

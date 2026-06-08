@@ -21,6 +21,16 @@ const ANIMATED_EFFECTS: EffectEntry[] = [
   { id: 'aurora', label: 'Aurora' },
   { id: 'ripple', label: 'Ripple' },
   { id: 'starfield', label: 'Stars' },
+  { id: 'liquid', label: 'Liquid' },
+  { id: 'vortex', label: 'Vortex' },
+  { id: 'infrared', label: 'Infrared' },
+  { id: 'glitchdrop', label: 'Glitch Drop' },
+  { id: 'crystal', label: 'Crystal' },
+  { divider: true, label: 'FX' },
+  { id: 'lightning', label: 'Lightning' },
+  { id: 'rain', label: 'Rain' },
+  { id: 'fire', label: 'Fire' },
+  { id: 'matrix', label: 'Matrix' },
 ]
 
 export function AnimationsPanel({ animatedState, onAnimatedStateChange }: Props) {

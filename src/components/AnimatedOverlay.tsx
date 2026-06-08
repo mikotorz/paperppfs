@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import type { AnimatedEffect } from '../types'
-import { drawHolographic, drawCRT, drawVHS, drawFilmReel, drawNeonPulse, drawRGBJitter } from '../processors/animatedEffects'
+import { drawHolographic, drawCRT, drawVHS, drawFilmReel, drawNeonPulse, drawRGBJitter, drawLightning, drawRain, drawFire, drawMatrix } from '../processors/animatedEffects'
 
 interface AnimatedOverlayProps {
   effect: AnimatedEffect
@@ -54,6 +54,10 @@ export function AnimatedOverlay({ effect, mainCanvasRef, tilt3D, tilt }: Animate
       else if (effect === 'filmreel') drawFilmReel(ctx, w, h, t)
       else if (effect === 'neonpulse') drawNeonPulse(ctx, w, h, t)
       else if (effect === 'rgbjitter') drawRGBJitter(ctx, w, h, t)
+      else if (effect === 'lightning') drawLightning(ctx, w, h, t)
+      else if (effect === 'rain') drawRain(ctx, w, h, t)
+      else if (effect === 'fire') drawFire(ctx, w, h, t)
+      else if (effect === 'matrix') drawMatrix(ctx, w, h, t)
 
       rafRef.current = requestAnimationFrame(tick)
     }

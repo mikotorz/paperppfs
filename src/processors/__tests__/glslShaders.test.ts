@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { WEBGL_EFFECTS, FRAGMENT_SHADERS, VERTEX_SHADER } from '../glslShaders'
 
-const GLSL_EFFECTS = ['plasma', 'aurora', 'ripple', 'starfield'] as const
+const GLSL_EFFECTS = ['plasma', 'aurora', 'ripple', 'starfield', 'liquid', 'vortex', 'infrared', 'glitchdrop', 'crystal'] as const
 type GlslEffect = typeof GLSL_EFFECTS[number]
 const CANVAS2D_EFFECTS = ['holographic', 'crt', 'vhs', 'filmreel', 'neonpulse', 'rgbjitter'] as const
 
@@ -37,12 +37,12 @@ describe('VERTEX_SHADER', () => {
 })
 
 describe('WEBGL_EFFECTS', () => {
-  it('contains all four GLSL shader effects', () => {
+  it('contains all nine GLSL shader effects', () => {
     for (const e of GLSL_EFFECTS) expect(WEBGL_EFFECTS.has(e)).toBe(true)
   })
 
-  it('contains exactly 4 effects', () => {
-    expect(WEBGL_EFFECTS.size).toBe(4)
+  it('contains exactly 9 effects', () => {
+    expect(WEBGL_EFFECTS.size).toBe(9)
   })
 
   it('does not contain canvas-2D effects', () => {
