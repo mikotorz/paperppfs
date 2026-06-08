@@ -86,7 +86,7 @@ export type EffectsParams = Pick<AdjustmentParams,
   | 'duotoneStrength' | 'duotoneShadowColor' | 'duotoneHighlightColor'
 >
 
-export type ActiveTab = 'adjustments' | 'filters' | 'grading' | 'effects' | 'animate'
+export type ActiveTab = 'film' | 'digital' | 'print' | 'animate' | 'edit'
 
 export interface CropRegion {
   x: number

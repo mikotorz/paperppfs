@@ -9,20 +9,20 @@ import { Canvas } from './components/Canvas'
 import { CropOverlay } from './components/CropOverlay'
 import { Toolbar } from './components/Toolbar'
 import { TabBar } from './components/ui/TabBar'
-import { AdjustmentsPanel } from './components/panels/AdjustmentsPanel'
-import { FiltersPanel } from './components/panels/FiltersPanel'
-import { ColorGradingPanel } from './components/panels/ColorGradingPanel'
-import { EffectsPanel } from './components/panels/EffectsPanel'
+import { FilmEffectsPanel } from './components/panels/FilmEffectsPanel'
+import { DigitalEffectsPanel } from './components/panels/DigitalEffectsPanel'
+import { PrintEffectsPanel } from './components/panels/PrintEffectsPanel'
 import { AnimationsPanel } from './components/panels/AnimationsPanel'
 import { AnimateWarningGate } from './components/panels/AnimateWarningGate'
 import { CropPanel } from './components/panels/CropPanel'
+import { EditPanel } from './components/panels/EditPanel'
 
 const TABS = [
-  { id: 'adjustments', label: 'Adjust' },
-  { id: 'filters', label: 'Filters' },
-  { id: 'grading', label: 'Color' },
-  { id: 'effects', label: 'Effects' },
+  { id: 'film',    label: 'Film'    },
+  { id: 'digital', label: 'Digital' },
+  { id: 'print',   label: 'Print'   },
   { id: 'animate', label: 'Animate' },
+  { id: 'edit',    label: 'Edit'    },
 ]
 
 export default function App() {
@@ -30,7 +30,7 @@ export default function App() {
   const [filename, setFilename] = useState('untitled')
   const [params, setParams] = useState<AdjustmentParams>(DEFAULT_PARAMS)
   const [activePreset, setActivePreset] = useState<PresetName>('none')
-  const [activeTab, setActiveTab] = useState<ActiveTab>('adjustments')
+  const [activeTab, setActiveTab] = useState<ActiveTab>('film')
   const [isCropMode, setIsCropMode] = useState(false)
   const [cropRegion, setCropRegion] = useState<CropRegion | null>(null)
   const [aspectRatio, setAspectRatio] = useState<AspectRatioPreset>('free')
@@ -194,19 +194,21 @@ export default function App() {
               onChange={id => setActiveTab(id as ActiveTab)}
             />
             <div className="flex-1 overflow-y-auto">
-              {activeTab === 'adjustments' && (
-                <AdjustmentsPanel params={params} onChange={handleParamChange} />
+              {activeTab === 'film' && (
+                <FilmEffectsPanel params={params} onChange={handleParamChange} />
               )}
-              {activeTab === 'filters' && (
-                <FiltersPanel activePreset={activePreset} onSelect={handlePresetSelect} />
+              {activeTab === 'digital' && (
+                <DigitalEffectsPanel params={params} onChange={handleParamChange} />
               )}
-              {activeTab === 'grading' && (
-                <ColorGradingPanel params={params} onChange={handleParamChange} />
+              {activeTab === 'print' && (
+                <PrintEffectsPanel params={params} onChange={handleParamChange} />
               )}
-              {activeTab === 'effects' && (
-                <EffectsPanel
+              {activeTab === 'edit' && (
+                <EditPanel
                   params={params}
+                  activePreset={activePreset}
                   onChange={handleParamChange}
+                  onPresetSelect={handlePresetSelect}
                 />
               )}
               {activeTab === 'animate' && (
